@@ -1,0 +1,49 @@
+// cSpell Settings
+{
+  // Version of the setting file.  Always 0.2
+  "version": "0.2",
+  // language - current active spelling language
+  "language": "en",
+  "useGitignore": true,
+  "dictionaryDefinitions": [
+    {
+      "name": "frontend",
+      "path": "./.cspell/dictionaries/frontend.txt"
+    },
+    {
+      "name": "typo",
+      "path": "./.cspell/dictionaries/typo.txt"
+    }
+  ],
+  "dictionaries": ["html", "frontend", "typo"],
+  "ignorePaths": [
+    "**/*.glsl",
+    "**/*.vert",
+    "**/*.frag",
+    "*.yaml",
+    "*.patch",
+    "**/mocks/**",
+    "*.js",
+    "*.atlas",
+    "*.skel",
+    "*.svg",
+    "./schemas/**/*.json",
+    "**/*.otf",
+    "**/*.sh",
+    "**/dist/**",
+    "**/public/**",
+    "**/coverage/**",
+    "**/*.mp(3|4)",
+    "**/*.webp",
+    "**/*.wav",
+    "**/*.proto",
+    "bundle.d.ts",
+    "bundle.json",
+    "resources.json",
+    "gen",
+    "v8-compile-cache-*",
+    "**/vite.config.mts.*.mjs",
+    // 先过滤pet组件下的文件，typo太多了
+    "**/@pet/**"
+  ]
+}
