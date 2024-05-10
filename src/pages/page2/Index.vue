@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 
-import Footer from '../page1/components/Footer.vue'
 const router = useRouter()
 const goBack = () => {
   router.back()
@@ -12,7 +11,6 @@ const goBack = () => {
   <div>
     <h1>Page 2</h1>
     <button @click="goBack">Go Back</button>
-    <Footer></Footer>
   </div>
 </template>
 

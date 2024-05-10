@@ -4,10 +4,8 @@ const path = require('path')
 const pageBaseDir = path.resolve(__dirname, '../src/pages')
 const pageDirs = fs.readdirSync(pageBaseDir)
 
-const baseRegexp = new RegExp(`\/${pageBaseDir}\/`)
-
 const zones = pageDirs.map((dir) => {
-  const targetRegexp = new RegExp(`\/${pageBaseDir}\/${dir}\/.+`)
+  const targetRegexp = new RegExp(`\/${dir}\/.+`)
   return {
     target: targetRegexp,
     forbiddenPatterns: [
@@ -15,11 +13,7 @@ const zones = pageDirs.map((dir) => {
         pattern: {
           test(str) {
             // Exclude modules from the pages directory
-            if (!baseRegexp.test(str)) {
-              return false
-            }
-
-            return !targetRegexp.test(str)
+            return !pageDirs.every(page => dir === page || !str.includes(`/${page}`))
           },
         },
         errorMessage: 'Do not reuse modules across page directories',
