@@ -1,11 +1,19 @@
-import { createSSRApp } from 'vue';
+import { VueQueryPlugin } from '@tanstack/vue-query'
+import { createSSRApp } from 'vue'
+import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router'
 
-import App from './App.vue';
+import App from './App.vue'
+import { routes } from './router/index'
 
-// SSR requires a fresh app instance per request, therefore we export a function
-// that creates a fresh app instance. If using Vuex, we'd also be creating a
-// fresh store here.
-export function createApp() {
-  const app = createSSRApp(App);
-  return { app };
+export function createApp(isServer = false) {
+  const app = createSSRApp(App)
+  app.use(VueQueryPlugin)
+  const history = isServer ? createWebHistory() : createMemoryHistory()
+
+  const router = createRouter({
+    history,
+    routes,
+  })
+
+  return { app, router }
 }

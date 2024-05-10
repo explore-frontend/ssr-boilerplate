@@ -1,10 +1,12 @@
 {
+  "extends": "@kwai-explore/tsconfig/tsconfig.json",
   "compilerOptions": {
     "composite": true,
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "verbatimModuleSyntax": true
   },
   "include": ["vite.config.mts", "server/**/*.ts"]
 }

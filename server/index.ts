@@ -1,37 +1,8 @@
-import fs from 'node:fs/promises';
-import express, { type Request, Response, NextFunction, RequestHandler } from 'express';
+import express from 'express';
 
-import compression from 'compression';
-import sirv from 'sirv';
-
-import { base, isProduction, port } from './env';
-import { getViteServer } from './vite-server';
+import { port } from './env';
 import 'colors';
-
-type ExpressMiddleware = (req?: Request, res?: Response, next?: NextFunction) => void;
-
-async function createMiddlewares() {
-  const middlewares: Array<ExpressMiddleware> = [];
-  if (isProduction) {
-    compression();
-  } else {
-    const { middlewares: viteMiddleware } = await getViteServer();
-    middlewares.push(viteMiddleware);
-  }
-
-  return middlewares;
-}
-
-type ExpressRouter = [string, RequestHandler];
-
-function createRouters() {
-  const routers: ExpressRouter[] = [];
-  if (isProduction) {
-    routers.push([base, sirv('./dist/client', { extensions: [] })]);
-  }
-
-  return routers;
-}
+import { createMiddlewares, createRouters } from './middlewares';
 
 async function createServer() {
   const app = express();
@@ -40,7 +11,7 @@ async function createServer() {
   console.log('Creating middlewares... done!'.green);
 
   console.log('Creating routers...'.yellow);
-  const routers = createRouters();
+  const routers = await createRouters();
   console.log('Creating routers... done!'.green);
 
   console.log('Registering middlewares and routes...'.yellow);
@@ -62,5 +33,3 @@ async function createServer() {
     console.log(`Server started at http://localhost:${port}`.green);
   });
 })();
-
-console.log('Creating middlewares...'.yellow);

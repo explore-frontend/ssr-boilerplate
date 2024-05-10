@@ -117,3 +117,6 @@ kwai
 sirv
 stylelint
 Avenir
+Vite
+tanstack
+pinia

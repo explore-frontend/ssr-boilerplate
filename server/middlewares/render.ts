@@ -1,5 +1,6 @@
-import fs from 'node:fs/promises';
-import express from 'express';
+import { readFile } from 'node:fs/promises';
+import { type RequestHandler } from 'express';
+import { getViteServer } from '../vite-server.js';
 
 // Constants
 const isProduction = process.env.NODE_ENV === 'production';
@@ -7,67 +8,79 @@ const port = process.env.PORT || 5173;
 const base = process.env.BASE || '/';
 
 // Cached production assets
-const templateHtml = isProduction ? await fs.readFile('./dist/client/index.html', 'utf-8') : '';
-const ssrManifest = isProduction ? await fs.readFile('./dist/client/.vite/ssr-manifest.json', 'utf-8') : undefined;
+let onlineTemplate = '';
+let onlineSSRManifest: string | undefined = undefined;
 
-// Create http server
-const app = express();
+async function getTemplateHTMLAndSSRManiFest(url: string): Promise<{
+  template: string;
+  ssrManifest?: string;
+}> {
+  // for dev server
+  if (!isProduction) {
+    const vite = await getViteServer();
+    // Always read fresh template in development
+    const htmlTemplate = await readFile('./index.html', 'utf-8');
+    const template = await vite.transformIndexHtml(url, htmlTemplate);
+    return {
+      template,
+    };
+  }
 
-// Add Vite or respective production middlewares
-let vite;
-if (!isProduction) {
-  const { createServer } = await import('vite');
-  vite = await createServer({
-    server: { middlewareMode: true },
-    appType: 'custom',
-    base,
-  });
-  app.use(vite.middlewares);
-} else {
-  const compression = (await import('compression')).default;
-  const sirv = (await import('sirv')).default;
-  app.use(compression());
-  app.use(base, sirv('./dist/client', { extensions: [] }));
+  // for production
+  if (onlineTemplate === '') {
+    // Parallel read
+    [onlineTemplate, onlineSSRManifest] = await Promise.all([
+      readFile('./dist/client/index.html', 'utf-8'),
+      readFile('./dist/client/.vite/ssr-manifest.json', 'utf-8'),
+    ]);
+  }
+  return {
+    template: onlineTemplate,
+    ssrManifest: onlineSSRManifest,
+  };
 }
 
-// Serve HTML
-app.use('*', async (req, res) => {
-  try {
-    const url = req.originalUrl.replace(base, '');
+async function getStream(url: string) {
+  const { template, ssrManifest } = await getTemplateHTMLAndSSRManiFest(url);
+  const vite = await getViteServer();
 
-    let template;
-    let render;
-    if (!isProduction) {
-      // Always read fresh template in development
-      template = await fs.readFile('./index.html', 'utf-8');
-      template = await vite.transformIndexHtml(url, template);
-      render = (await vite.ssrLoadModule('/src/entry-server.ts')).render;
-    } else {
-      template = templateHtml;
-      render = (await import('./dist/server/entry-server.js')).render;
+  // TODO online render cache
+  const { render } = !isProduction
+    ? await vite.ssrLoadModule('/src/entry-server.ts')
+    : // @ts-expect-error
+      await import('../../dist/server/entry-server.js');
+  const { stream } = render(url, ssrManifest);
+
+  const [htmlStart, htmlEnd] = template.split('<!--app-html-->');
+
+  return {
+    htmlStart,
+    stream,
+    htmlEnd,
+  };
+}
+
+export async function getRenderRouter(): Promise<[string, RequestHandler]> {
+  const vite = await getViteServer();
+  const requestHandler: RequestHandler = async (req, res) => {
+    try {
+      const url = req.originalUrl.replace(base, '');
+      const { htmlStart, htmlEnd, stream } = await getStream(url);
+      res.status(200).set({ 'Content-Type': 'text/html' });
+      res.write(htmlStart);
+      for await (const chunk of stream) {
+        if (res.closed) break;
+        res.write(chunk);
+      }
+      res.write(htmlEnd);
+      res.end();
+    } catch (error) {
+      const e = error as Error;
+      vite?.ssrFixStacktrace(e);
+      console.log(e.stack);
+      res.status(500).end(e.stack);
     }
+  };
 
-    const { stream } = render(url, ssrManifest);
-
-    const [htmlStart, htmlEnd] = template.split('<!--app-html-->');
-
-    res.status(200).set({ 'Content-Type': 'text/html' });
-
-    res.write(htmlStart);
-    for await (const chunk of stream) {
-      if (res.closed) break;
-      res.write(chunk);
-    }
-    res.write(htmlEnd);
-    res.end();
-  } catch (e) {
-    vite?.ssrFixStacktrace(e);
-    console.log(e.stack);
-    res.status(500).end(e.stack);
-  }
-});
-
-// Start http server
-app.listen(port, () => {
-  console.log(`Server started at http://localhost:${port}`);
-});
+  return ['*', requestHandler];
+}
