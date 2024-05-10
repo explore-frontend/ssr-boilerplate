@@ -1,7 +1,7 @@
 /* eslint-env node */
-require('@rushstack/eslint-patch/modern-module-resolution');
+require('@rushstack/eslint-patch/modern-module-resolution')
 
-const crossImportsPatterns = require('./custom-lint-rules/cross-import-patterns.cjs');
+const crossImportsPatterns = require('./custom-lint-rules/cross-import-patterns.cjs')
 
 module.exports = {
   root: true,
@@ -28,4 +28,4 @@ module.exports = {
     ],
     'code-import-patterns/patterns': crossImportsPatterns,
   },
-};
+}

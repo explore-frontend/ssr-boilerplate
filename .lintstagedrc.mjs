@@ -3,4 +3,4 @@ export default {
   'server/**/*.{ts}': ['prettier --write'],
   '**/*.{js,mts,mjs,css,json,md}': 'prettier --write',
   './**/*.{vue,css,scss,less}': 'stylelint',
-};
+}

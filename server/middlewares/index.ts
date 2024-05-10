@@ -1,43 +1,41 @@
-import { getRenderRouter } from './render';
-import type { Request, Response, NextFunction, RequestHandler } from 'express';
+import compression from 'compression'
+import type { Request, Response, NextFunction, RequestHandler } from 'express'
+import sirv from 'sirv'
 
-import { base, isProduction } from '../env';
+import { getRenderRouter } from './render'
+import { base, isProduction } from '../env'
+import { getViteServer } from '../vite-server'
+import 'colors'
 
-import compression from 'compression';
-import sirv from 'sirv';
+type ExpressMiddleware = (req: Request, res: Response, next: NextFunction) => void
 
-import { getViteServer } from '../vite-server';
-import 'colors';
-
-type ExpressMiddleware = (req: Request, res: Response, next: NextFunction) => void;
-
-type ExpressRouter = [string, RequestHandler];
+type ExpressRouter = [string, RequestHandler]
 
 export async function createMiddlewares() {
-  const middlewares: Array<ExpressMiddleware> = [];
+  const middlewares: Array<ExpressMiddleware> = []
 
   if (isProduction) {
-    middlewares.push(compression());
+    middlewares.push(compression())
   } else {
-    const { middlewares: viteMiddleware } = await getViteServer();
-    middlewares.push(viteMiddleware);
+    const { middlewares: viteMiddleware } = await getViteServer()
+    middlewares.push(viteMiddleware)
   }
 
-  return middlewares;
+  return middlewares
 }
 
 export async function createRouters() {
-  const routers: ExpressRouter[] = [];
+  const routers: ExpressRouter[] = []
 
-  const renderRouter = await getRenderRouter();
+  const renderRouter = await getRenderRouter()
 
   if (isProduction) {
     // Compress all assets
-    routers.push([base, sirv('./dist/client', { extensions: [] })]);
+    routers.push([base, sirv('./dist/client', { extensions: [] })])
   }
 
   // Server render
-  routers.push(renderRouter);
+  routers.push(renderRouter)
 
-  return routers;
+  return routers
 }
