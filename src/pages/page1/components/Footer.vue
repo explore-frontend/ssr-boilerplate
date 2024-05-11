@@ -2,7 +2,7 @@
 <template>
   <div>Footer</div>
 </template>
-<style lang="scss" module>
+<style lang="scss" scoped>
 div {
   color: red;
 }

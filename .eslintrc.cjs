@@ -1,12 +1,10 @@
 /* eslint-env node */
 require('@rushstack/eslint-patch/modern-module-resolution')
 
-const crossImportsPatterns = require('./custom-lint-rules/cross-import-patterns.cjs')
-
 module.exports = {
   root: true,
   extends: ['@kwai-explore/eslint-config/preset/vue3-ts'],
-  plugins: ['code-import-patterns'],
+  plugins: ['import-isolation'],
   overrides: [
     {
       files: ['src/**/*.ts', 'src/**/*.vue', 'server/**/*.ts'],
@@ -26,6 +24,22 @@ module.exports = {
         beforeStatementContinuationChars: 'never',
       },
     ],
-    'code-import-patterns/patterns': crossImportsPatterns,
+    'import-isolation/isolation': [
+      'error',
+      {
+        isolationGroups: [
+          {
+            directories: [
+              'pages/*',
+              // 'modules/*',
+              // equivalent to
+              // "modules/a"
+              // "modules/b"
+              // ...
+            ],
+          },
+        ],
+      },
+    ],
   },
 }
