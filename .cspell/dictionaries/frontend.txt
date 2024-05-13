@@ -120,3 +120,4 @@ Avenir
 Vite
 tanstack
 pinia
+intlify

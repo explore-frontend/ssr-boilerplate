@@ -4,7 +4,7 @@ require('@rushstack/eslint-patch/modern-module-resolution')
 module.exports = {
   root: true,
   extends: ['@kwai-explore/eslint-config/preset/vue3-ts'],
-  plugins: ['import-isolation'],
+  plugins: ['import-isolation', '@intlify/vue-i18n'],
   overrides: [
     {
       files: ['src/**/*.ts', 'src/**/*.vue', 'server/**/*.ts'],
@@ -24,22 +24,26 @@ module.exports = {
         beforeStatementContinuationChars: 'never',
       },
     ],
+    // 跨文件目录引用检查
     'import-isolation/isolation': [
       'error',
       {
         isolationGroups: [
           {
-            directories: [
-              'pages/*',
-              // 'modules/*',
-              // equivalent to
-              // "modules/a"
-              // "modules/b"
-              // ...
-            ],
+            directories: ['pages/*'],
           },
         ],
       },
     ],
+    // i18n检查
+    '@intlify/vue-i18n/no-raw-text': 'warn',
+    '@intlify/vue-i18n/no-missing-keys': 'error',
+    '@intlify/vue-i18n/no-html-messages': 'warn',
+    '@intlify/vue-i18n/no-v-html': 'warn',
+  },
+  settings: {
+    'vue-i18n': {
+      localeDir: './src/locales/*.{json,json5,yaml,yml}',
+    },
   },
 }
