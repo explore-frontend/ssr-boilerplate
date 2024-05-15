@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/vue-query'
-import { defineStore } from 'pinia'
+import { isServer, useQuery } from '@tanstack/vue-query'
 import { onServerPrefetch, ref } from 'vue'
 import { useRoute } from 'vue-router'
+
+import { createModel } from '@/utils/model'
 
 type MockResponse = {
   result: number
@@ -10,12 +11,11 @@ type MockResponse = {
   }
 }
 
-export const usePage1Model = defineStore('page1', () => {
+export const usePage1Model = createModel(() => {
   const route = useRoute()
   const { data, suspense } = useQuery({
     queryKey: ['page1', route.path],
     refetchOnMount: true,
-    staleTime: 0,
     queryFn: () => {
       console.warn('请求数据了')
       return new Promise<MockResponse>((resolve) => {
@@ -30,7 +30,10 @@ export const usePage1Model = defineStore('page1', () => {
       })
     },
   })
-  onServerPrefetch(suspense)
+  onServerPrefetch(async () => {
+    await suspense()
+    console.error('李克和回复')
+  })
   // 定义数据
   const count = ref(0)
 

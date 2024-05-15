@@ -1,6 +1,13 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { usePage1Model } from '../model'
+const { count, data } = usePage1Model()
+</script>
 <template>
-  <div>Footer</div>
+  <div>
+    Footer
+    {{ count }}
+    {{ data }}
+  </div>
 </template>
 <style lang="scss" scoped>
 div {

@@ -20,9 +20,6 @@ dependencies:
   express:
     specifier: ^4.19.2
     version: 4.19.2
-  pinia:
-    specifier: ^2.1.7
-    version: 2.1.7(typescript@5.4.5)(vue@3.4.27)
   sirv:
     specifier: ^2.0.4
     version: 2.0.4
@@ -30,7 +27,7 @@ dependencies:
     specifier: ^4.9.3
     version: 4.9.3
   vue:
-    specifier: ^3.4.23
+    specifier: ^3.4.27
     version: 3.4.27(typescript@5.4.5)
   vue-i18n:
     specifier: '9'
@@ -79,6 +76,9 @@ devDependencies:
   '@vitejs/plugin-vue':
     specifier: ^5.0.4
     version: 5.0.4(vite@5.2.11)(vue@3.4.27)
+  '@vue/runtime-core':
+    specifier: ^3.4.27
+    version: 3.4.27
   colors:
     specifier: ^1.4.0
     version: 1.4.0
@@ -5570,24 +5570,6 @@ packages:
     resolution: {integrity: sha512-C3FsVNH1udSEX48gGX1xfvwTWfsYWj5U+8/uK15BGzIGrKoUpghX8hWZwa/OFnakBiiVNmBvemTJR5mcy7iPcg==}
     engines: {node: '>=4'}
     dev: true
-
-  /pinia@2.1.7(typescript@5.4.5)(vue@3.4.27):
-    resolution: {integrity: sha512-+C2AHFtcFqjPih0zpYuvof37SFxMQ7OEG2zV9jRI12i9BOy3YQVAHwdKtyyc8pDcDyIc33WCIsZaCFWU7WWxGQ==}
-    peerDependencies:
-      '@vue/composition-api': ^1.4.0
-      typescript: '>=4.4.4'
-      vue: ^2.6.14 || ^3.3.0
-    peerDependenciesMeta:
-      '@vue/composition-api':
-        optional: true
-      typescript:
-        optional: true
-    dependencies:
-      '@vue/devtools-api': 6.6.1
-      typescript: 5.4.5
-      vue: 3.4.27(typescript@5.4.5)
-      vue-demi: 0.14.7(vue@3.4.27)
-    dev: false
 
   /possible-typed-array-names@1.0.0:
     resolution: {integrity: sha512-d7Uw+eZoloe0EHDIYoe+bQ5WXnGMOpmiZFTuMWCwpjzzkL2nTjcKiAk4hh8TjnGye2TwWOk3UXucZ+3rbmBa8Q==}

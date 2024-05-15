@@ -104,7 +104,7 @@ async function getStream(url: string) {
     : // @ts-expect-error
       await import('../../dist/server/entry-server.js')
 
-  const app = await getApp(url, ssrManifest)
+  const { app, hydrationInfo } = await getApp(url)
 
   const ctx: SSRContext = {}
   const stream = renderToNodeStream(app, ctx)
@@ -117,6 +117,7 @@ async function getStream(url: string) {
     htmlStart: htmlStart?.replace('<!--app-head-->', preloadLinks),
     stream,
     htmlEnd,
+    hydrationInfo,
   }
 }
 
@@ -125,7 +126,7 @@ export async function getRenderRouter(): Promise<[string, RequestHandler]> {
   const requestHandler: RequestHandler = async (req, res) => {
     try {
       const url = req.originalUrl.replace(base, '')
-      const { htmlStart, htmlEnd, stream } = await getStream(url)
+      const { htmlStart, htmlEnd, stream, hydrationInfo } = await getStream(url)
       res.status(200).set({ 'Content-Type': 'text/html' })
       res.write(htmlStart)
       for await (const chunk of stream) {
@@ -134,7 +135,13 @@ export async function getRenderRouter(): Promise<[string, RequestHandler]> {
         }
         res.write(chunk)
       }
-      res.write(htmlEnd)
+
+      res.write(
+        htmlEnd?.replace(
+          '<!--app-init-state-->',
+          ['<script>', `window.HYDRATION_INIT_STATE=${JSON.stringify(hydrationInfo.toJSON())}`, '</script>'].join(''),
+        ),
+      )
       res.end()
     } catch (error) {
       const e = error as Error
